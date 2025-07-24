@@ -1,7 +1,20 @@
 # Supabase Docker
 
-This is a minimal Docker Compose setup for self-hosting several instances of Supabase. 
-Follow the steps [here](https://supabase.com/docs/guides/hosting/docker) to get started.
+This is a minimal Docker Compose setup for self-hosting several instances of Supabase.
+
+
+# How to use it
+In order to host it in a public server and in domain `mydomain.info`, clone the repo. Note that here we assume that mydomain.info is a domain that you own and that you have access to its DNS settings. As well as using that URL, you will get access both to the API and to the dashboard, as it will be the entrypoint to communicate with the API Gateway `kong`. Indeed it's the latter that will be responsible to wire up the requests to the correct service.
+
+In addition to supabase docs and suggested steps, here are the steps to follow:
+- Change the environment variables in the .env:
+- Change the `NGINX_VIRTUAL_HOST` and `LETSENCRYPT_VIRTUAL_HOST` to your domain
+- Change the `DEFAULT_EMAIL` to your email
+- Change the `CLERK_CLIENT_ID`, `CLERK_CLIENT_SECRET` and `CLERK_ISSUER` to your Clerk credentials
+- Change the `SESSION_SECRET` to a random hex string of at least 32 characters
+- Change the `SUPABASE_PUBLIC_URL` and `API_EXTERNAL_URL` to the URL you want to access
+
+## Some notes
 
 Note that: 
 - It makes use of Clerk for authentication of the dashboard
@@ -16,7 +29,7 @@ Note that:
 - **I HAVE NOT TOUCHED ANYTHING in the dev folder and docker-compose.s3.yml file.**
 
 
-## Some comments for further development
+## Some other comments for further development
 
 
 ### 🧩 Problem Overview
