@@ -1,0 +1,41 @@
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.tmpl:/app/nginx.tmpl:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - letsencrypt-certs:/etc/nginx/certs
+      - letsencrypt-vhost-d:/etc/nginx/vhost.d
+      - letsencrypt-html:/usr/share/nginx/html
+    networks:
+      - my_project_net
+
+  letsencrypt-proxy:
+    image: nginxproxy/acme-companion
+    container_name: letsencrypt-proxy
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt-certs:/etc/nginx/certs
+      - letsencrypt-vhost-d:/etc/nginx/vhost.d
+      - letsencrypt-html:/usr/share/nginx/html
+    environment:
+      - DEFAULT_EMAIL=${DEFAULT_EMAIL}
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+    networks:
+      - my_project_net
+
+networks:
+  my_project_net:
+    external: true
+    name: ${PROJECT_NAME}_nginx_proxy
+
+volumes:
+  letsencrypt-certs:
+  letsencrypt-vhost-d:
+  letsencrypt-html:

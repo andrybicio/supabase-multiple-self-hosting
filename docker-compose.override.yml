@@ -1,0 +1,134 @@
+# Usage
+#   Start:              docker compose -f docker-compose.yml -f ./dev/docker-compose.override.yml up up
+#   Stop:               docker compose -f docker-compose.yml -f ./dev/docker-compose.override.yml down
+#   Destroy:            docker compose -f docker-compose.yml -f ./dev/docker-compose.override.yml down -v --remove-orphans
+#   Reset everything:  ./reset.sh
+
+name: ${PROJECT_NAME}
+
+services:
+  studio:
+    container_name: ${PROJECT_NAME}-studio
+    environment:
+      VIRTUAL_HOST:  ${NGINX_VIRTUAL_HOST}
+      LETSENCRYPT_HOST:  ${LETSENCRYPT_VIRTUAL_HOST}
+
+  kong:
+    container_name: ${PROJECT_NAME}-kong
+    image: revomatico/docker-kong-oidc:2.8.1-1
+    restart: unless-stopped
+    expose:
+      - "8443"
+      - "8000"
+    ports:
+    networks:
+      default:
+        aliases:
+          - kong-${PROJECT_NAME}
+    environment:
+      CLERK_CLIENT_ID: ${CLERK_CLIENT_ID}
+      CLERK_CLIENT_SECRET: ${CLERK_CLIENT_SECRET}
+      CLERK_ISSUER: ${CLERK_ISSUER}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SUPABASE_PUBLIC_URL: ${SUPABASE_PUBLIC_URL}
+      VIRTUAL_PORT: 8000
+      VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
+
+  auth:
+    container_name: ${PROJECT_NAME}-auth
+    environment:
+      VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
+
+  rest:
+    container_name: ${PROJECT_NAME}-rest
+    environment:
+      VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
+
+  realtime:
+    container_name: ${PROJECT_NAME}-realtime
+    environment:
+      VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
+
+  storage:
+    environment:
+      VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
+
+  imgproxy:
+    container_name: ${PROJECT_NAME}-imgproxy
+    environment:
+      VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
+
+  meta:
+    container_name: ${PROJECT_NAME}-meta
+    environment:
+      VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
+
+  functions:
+    container_name: ${PROJECT_NAME}-functions
+    environment:
+      VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
+
+  analytics:
+    container_name: ${PROJECT_NAME}-analytics
+    ports:
+    environment:
+      VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
+
+  # Comment out everything below this point if you are using an external Postgres database
+  db:
+    container_name: ${PROJECT_NAME}-db
+    environment:
+      VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
+    volumes:
+      - ./volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
+      # Must be superuser to create event trigger
+      - ./volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
+      # Must be superuser to alter reserved role
+      - ./volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
+      # Initialize the database settings with JWT_SECRET and JWT_EXP
+      - ./volumes/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z
+      # PGDATA directory is persisted between restarts
+      - ./volumes/db/data:/var/lib/postgresql/data:Z
+      # Changes required for internal supabase data such as _analytics
+      - ./volumes/db/_supabase.sql:/docker-entrypoint-initdb.d/migrations/97-_supabase.sql:Z
+      # Changes required for Analytics support
+      - ./volumes/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z
+      # Changes required for Pooler support
+      - ./volumes/db/pooler.sql:/docker-entrypoint-initdb.d/migrations/99-pooler.sql:Z
+      # Use named volume to persist pgsodium decryption key between restarts
+      - db-config:/etc/postgresql-custom
+    
+
+  vector:
+    container_name: ${PROJECT_NAME}-vector
+    environment:
+      VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
+      PROJECT_PREFIX: ${PROJECT_NAME}
+    
+
+  supavisor:
+    container_name: ${PROJECT_NAME}-supavisor
+    ports:
+    environment:
+      VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
+
+volumes:
+  db-config:
+
+networks:
+  default:
+    name: ${PROJECT_NAME}_nginx_proxy
+    external: true
+    driver: bridge
