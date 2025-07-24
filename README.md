@@ -6,9 +6,13 @@ This is a minimal Docker Compose setup for self-hosting several instances of Sup
 # How to use it
 In order to host it in a public server and in domain `mydomain.info`, clone the repo. Note that here we assume that mydomain.info is a domain that you own and that you have access to its DNS settings. As well as using that URL, you will get access both to the API and to the dashboard, as it will be the entrypoint to communicate with the API Gateway `kong`. Indeed it's the latter that will be responsible to wire up the requests to the correct service.
 
-In addition to supabase docs and suggested steps, here are some steps to follow.
+In addition to supabase docs and suggested steps, here are some steps to follow:
+1. Copy the .env.example file to .env:
+```
+cp .env.example .env
+```
 
-Change the environment variables in the .env:
+2. Change the environment variables in the .env:
 - Change the `PROJECT_NAME` to the name of your project
 - Change the `NGINX_VIRTUAL_HOST` and `LETSENCRYPT_VIRTUAL_HOST` to your domain
 - Change the `DEFAULT_EMAIL` to your email
@@ -16,7 +20,7 @@ Change the environment variables in the .env:
 - Change the `SESSION_SECRET` to a random hex string of at least 32 characters
 - Change the `SUPABASE_PUBLIC_URL` and `API_EXTERNAL_URL` to the URL you want to access
 
-The command for spinning up the services will be:
+3. The command for spinning up the services will be:
 ```
 docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
 ```
