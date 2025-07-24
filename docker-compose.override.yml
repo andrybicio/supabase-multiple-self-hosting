@@ -26,6 +26,8 @@ services:
         aliases:
           - kong-${PROJECT_NAME}
     environment:
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth,bundled,jwt,oidc
+      
       CLERK_CLIENT_ID: ${CLERK_CLIENT_ID}
       CLERK_CLIENT_SECRET: ${CLERK_CLIENT_SECRET}
       CLERK_ISSUER: ${CLERK_ISSUER}
