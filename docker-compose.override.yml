@@ -20,8 +20,9 @@ services:
     expose:
       - "8443"
       - "8000"
+    # dummy definition to replace the ports values in the original file 
     ports:
-    
+      - "127.0.0.1:65535:65535" 
     networks:
       default:
         aliases:
@@ -82,7 +83,9 @@ services:
 
   analytics:
     container_name: ${PROJECT_NAME}-analytics
+    # dummy definition to replace the ports values in the original file 
     ports:
+      - "127.0.0.1:65534:65534" 
     environment:
       VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
       LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
@@ -123,7 +126,9 @@ services:
 
   supavisor:
     container_name: ${PROJECT_NAME}-supavisor
+    # dummy definition to replace the ports values in the original file 
     ports:
+      - "127.0.0.1:65533:65533" 
     environment:
       VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
       LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}

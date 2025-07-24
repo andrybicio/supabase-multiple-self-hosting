@@ -32,9 +32,9 @@ Note that:
     - The image used for kong is `revomatico/docker-kong-oidc:2.8.1-1` which has already the oidc plugin installed. Else it would have been necessary to build the image from scratch which isn't that simple for we are using the CE edition.
     - If one wants to use the basic auth with the alert, simply delete/comment the oidc plugin in the `kong.yml` file and decomment the basic-auth plugin. In this case you can sticl to the default `kong:2.8.1` image.
 - It makes use of nginx reverse proxy for redirecting requests to KONG, which in turn will redirect to the correct service
-    - A basic example of the configuration has to be found in `nginx/` folder
-    - Note that 
-- No ports of the supabase-related services are exposed to the localhost. 
+    - A basic example of the configuration can be found in `nginx/` folder
+    - In `nginx.example.tmpl` you have to replace the target for redirection with the *actual* kong alias defined in `docker-compose.override.yml`. Also, one has to specify the config value by mounting the volume `./nginx.tmpl:/app/nginx.tmpl:ro`
+- No ports of the supabase-related services are exposed to the localhost except for dummy ports used to replace the ports values in the original file. 
     - If you want to use them, simply change the ports in the docker-compose.yml file and make them unique among services to avoid port conflicts
 
 - **I HAVE NOT TOUCHED ANYTHING in the dev folder and docker-compose.s3.yml file.**
