@@ -54,6 +54,7 @@ services:
       LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
 
   storage:
+    container_name: ${PROJECT_NAME}-storage
     environment:
       VIRTUAL_HOST: ${NGINX_VIRTUAL_HOST}
       LETSENCRYPT_HOST: ${LETSENCRYPT_VIRTUAL_HOST}
